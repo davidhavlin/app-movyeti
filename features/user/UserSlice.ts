@@ -1,25 +1,9 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit'
-import UserApi from '../../app/api/User/UserApi'
 import { RootState } from '../../app/store'
 import * as SecureStore from 'expo-secure-store'
-
-export interface RegisterData {
-  email: string
-  username: string
-  password: string
-}
-export interface LoginData {
-  email: string
-  password: string
-}
-export interface TUser {
-  email: string
-  username: string
-  id: number
-}
-export interface UserState {
-  user: null | TUser
-}
+import { UserState } from '../../types/user-types'
+import { LoginData, RegisterData } from '../../types/auth-types'
+import api from '../../app/api'
 
 const initialState: UserState = {
   user: null,
@@ -29,16 +13,6 @@ export const slice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    increment: (state) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      //   state.value += 1
-    },
-    decrement: (state) => {
-      //   state.value -= 1
-    },
     setUser: (state, action) => {
       console.log('setting user', { action })
 
@@ -47,7 +21,7 @@ export const slice = createSlice({
   },
 })
 
-export const { increment, decrement, setUser } = slice.actions
+export const { setUser } = slice.actions
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This
@@ -55,7 +29,8 @@ export const { increment, decrement, setUser } = slice.actions
 // code can then be executed and other actions can be dispatched
 export const authUser = () => async (dispatch: Dispatch) => {
   try {
-    const user = await UserApi.authUser()
+    const user = await api.get('user').authUser()
+
     dispatch(setUser(user))
   } catch (error) {
     console.log(error)
@@ -66,7 +41,7 @@ export const registerUser =
   (formData: RegisterData, cb: () => void) => async (dispatch: Dispatch) => {
     // dispatch(incrementByAmount(amount))
     try {
-      const user = await UserApi.registerUser(formData)
+      const user = await api.get('user').registerUser(formData)
       console.log({ user })
 
       cb()
@@ -77,7 +52,7 @@ export const registerUser =
 
 export const loginUser = (formData: LoginData, cb: () => void) => async (dispatch: Dispatch) => {
   try {
-    const { token, user } = await UserApi.loginUser(formData)
+    const { token, user } = await api.get('user').loginUser(formData)
     console.log({ user, token })
     dispatch(setUser(user))
     await SecureStore.setItemAsync('auth_token', token)

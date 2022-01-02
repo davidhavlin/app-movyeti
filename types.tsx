@@ -13,9 +13,12 @@ declare global {
   }
 }
 
+export type TScreens = 'Login' | 'Register' | 'Home'
+
 export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined
   Login: undefined
+  Home: undefined
   Register: undefined
   Modal: undefined
   NotFound: undefined

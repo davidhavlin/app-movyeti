@@ -5,13 +5,24 @@
  */
 import { FontAwesome } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native'
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+  useNavigation,
+} from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import * as React from 'react'
+// import * as React from 'react'
+import React, { useEffect, useState } from 'react'
+
 import { ColorSchemeName, Pressable } from 'react-native'
+import { useSelector } from 'react-redux'
+import { getWishRoute } from '../app/GlobalSlice'
 
 import Colors from '../constants/Colors'
+import { selectUser } from '../features/user/UserSlice'
 import useColorScheme from '../hooks/useColorScheme'
+import Home from '../screens/Home'
 import { Login } from '../screens/Login'
 import ModalScreen from '../screens/ModalScreen'
 import NotFoundScreen from '../screens/NotFoundScreen'
@@ -22,12 +33,14 @@ import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../typ
 import LinkingConfiguration from './LinkingConfiguration'
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+  const user = useSelector(selectUser)
+
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
     >
-      <RootNavigator />
+      {user ? <MainNavigator /> : <RootNavigator />}
     </NavigationContainer>
   )
 }
@@ -39,12 +52,33 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
 function RootNavigator() {
+  const nav = useNavigation()
+  const wishRoute = useSelector(getWishRoute)
+
+  useEffect(() => {
+    console.log('WISH ROUTE', wishRoute)
+    if (!wishRoute) return
+    nav.navigate(wishRoute)
+  }, [wishRoute])
+
   return (
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="Login" component={Login} options={{ title: 'wtf' }} />
       <Stack.Screen name="Register" component={Register} options={{ title: 'wtf' }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
+      <Stack.Group screenOptions={{ presentation: 'modal' }}>
+        <Stack.Screen name="Modal" component={ModalScreen} />
+      </Stack.Group>
+    </Stack.Navigator>
+  )
+}
+
+function MainNavigator() {
+  return (
+    <Stack.Navigator>
+      {/* <Stack.Screen name="Main" component={BottomTabNavigator} options={{ headerShown: false }} /> */}
+      <Stack.Screen name="Home" component={Home} options={{ title: 'wtf' }} />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
       </Stack.Group>

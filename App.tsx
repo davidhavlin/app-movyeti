@@ -6,11 +6,14 @@ import useColorScheme from './hooks/useColorScheme'
 import Navigation from './navigation'
 import { Provider as ReduxProvider, useDispatch } from 'react-redux'
 
-import { store } from './app/store'
-import Ws from './services/socket'
+import store from './app/store'
 import { useEffect } from 'react'
 import { authUser } from './features/user/UserSlice'
-Ws.boot()
+import { initWebsockets } from './app/api'
+// Ws.boot()
+// const userSocket = new Ws()
+
+console.log(store)
 
 const Main = () => {
   const colorScheme = useColorScheme()
@@ -30,6 +33,7 @@ const Main = () => {
 
 const App = () => {
   const isLoadingComplete = useCachedResources()
+  initWebsockets(store)
 
   if (!isLoadingComplete) {
     return null

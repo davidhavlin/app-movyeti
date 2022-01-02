@@ -1,36 +1,36 @@
 import { io, Socket } from 'socket.io-client'
 import { apiUrl } from '../environment'
 import * as SecureStore from 'expo-secure-store'
-import { UserListeners } from '../app/api/User/UserListeners'
+// import { UserListeners } from '../app/api/User/UserListeners'
 
 class Ws {
   public socket!: Socket
   private booted = false
+  public navigation: any
 
-  async boot() {
+  async boot(namespace = '', auth = true, navigation?: any) {
     if (this.booted) return
     const token = await SecureStore.getItemAsync('auth_token')
 
     this.booted = true
-    this.socket = io(apiUrl, { auth: { token } })
+    this.navigation = navigation
+    this.socket = io(apiUrl + namespace, auth ? { auth: { token } } : {})
 
-    console.log({ apiUrl, token })
+    // this.socket.on('connect_error', (err) => {
+    //   console.log('nom error', err)
+    // })
 
-    this.socket.on('connect_error', (err) => {
-      console.log('nom error', err)
-    })
-
-    this.socket.on('connect', () => {
-      this.onConnect(this.socket)
-    })
+    // this.socket.on('connect', () => {
+    //   this.onConnect(this.socket)
+    // })
   }
 
-  onConnect(socket: Socket) {
-    console.log('onConnect', !!socket)
-    if (!socket) return
-    UserListeners(socket)
-    // ErrorListeners(socket)
-  }
+  // onConnect(socket: Socket) {
+  //   console.log('onConnect', !!socket)
+  //   if (!socket) return
+  //   UserListeners(socket)
+  //   ErrorListeners(socket)
+  // }
 }
 
-export default new Ws()
+export default Ws
